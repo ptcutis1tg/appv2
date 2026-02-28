@@ -42,12 +42,11 @@ class _FastEntryScreenState extends State<FastEntryScreen> {
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
+    final picked = await showModalBottomSheet<DateTime>(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(now.year - 10),
-      lastDate: DateTime(now.year + 10),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CalendarPickerSheet(initialDate: _selectedDate),
     );
     if (picked == null) return;
 
@@ -410,6 +409,329 @@ class _CategoryChip extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CalendarPickerSheet extends StatefulWidget {
+  const _CalendarPickerSheet({required this.initialDate});
+
+  final DateTime initialDate;
+
+  @override
+  State<_CalendarPickerSheet> createState() => _CalendarPickerSheetState();
+}
+
+class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
+  late DateTime _selectedDate;
+  late DateTime _displayedMonth;
+  bool _showYearPicker = false;
+
+  static const _weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  static const _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+    _displayedMonth = DateTime(widget.initialDate.year, widget.initialDate.month);
+  }
+
+  void _goPrevMonth() {
+    setState(() {
+      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+    });
+  }
+
+  void _goNextMonth() {
+    setState(() {
+      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+    });
+  }
+
+  void _toggleYearPicker() {
+    setState(() {
+      _showYearPicker = !_showYearPicker;
+    });
+  }
+
+  void _selectYear(int year) {
+    setState(() {
+      _displayedMonth = DateTime(year, _displayedMonth.month, 1);
+      if (_selectedDate.year != year) {
+        final maxDayInMonth = DateTime(year, _selectedDate.month + 1, 0).day;
+        final safeDay = _selectedDate.day > maxDayInMonth ? maxDayInMonth : _selectedDate.day;
+        _selectedDate = DateTime(
+          year,
+          _selectedDate.month,
+          safeDay,
+          _selectedDate.hour,
+          _selectedDate.minute,
+        );
+      }
+      _showYearPicker = false;
+    });
+  }
+
+  List<int> _yearOptions() {
+    final centerYear = _displayedMonth.year;
+    return List.generate(61, (i) => centerYear - 30 + i);
+  }
+
+  List<DateTime> _visibleDatesForMonth(DateTime month) {
+    final firstOfMonth = DateTime(month.year, month.month, 1);
+    final firstGridDate = firstOfMonth.subtract(Duration(days: firstOfMonth.weekday - 1));
+    return List.generate(42, (i) => firstGridDate.add(Duration(days: i)));
+  }
+
+  bool _isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final dates = _visibleDatesForMonth(_displayedMonth);
+    final monthLabel = _monthNames[_displayedMonth.month - 1];
+    final yearLabel = '${_displayedMonth.year}';
+    final years = _yearOptions();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 80, 16, 20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF070B11),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          monthLabel,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _toggleYearPicker,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                            child: Row(
+                              children: [
+                                Text(
+                                  yearLabel,
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Icon(
+                                  _showYearPicker
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
+                                  color: const Color(0xFF90A2C3),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    if (!_showYearPicker) ...[
+                      IconButton(
+                        onPressed: _goPrevMonth,
+                        icon: const Icon(Icons.chevron_left, color: Color(0xFF90A2C3)),
+                      ),
+                      IconButton(
+                        onPressed: _goNextMonth,
+                        icon: const Icon(Icons.chevron_right, color: Color(0xFF90A2C3)),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: _showYearPicker
+                      ? SizedBox(
+                          key: const ValueKey('year-grid'),
+                          height: 320,
+                          child: GridView.builder(
+                            itemCount: years.length,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              mainAxisExtent: 56,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            itemBuilder: (context, index) {
+                              final year = years[index];
+                              final isCurrent = year == _displayedMonth.year;
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(14),
+                                onTap: () => _selectYear(year),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isCurrent
+                                        ? colors.primary.withValues(alpha: 0.18)
+                                        : const Color(0xFF111821),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: isCurrent
+                                          ? colors.primary
+                                          : const Color(0xFF1E2A3A),
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '$year',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: isCurrent
+                                          ? colors.primary
+                                          : const Color(0xFFD3DCE9),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : Column(
+                          key: const ValueKey('day-grid'),
+                          children: [
+                            Row(
+                              children: _weekdays
+                                  .map(
+                                    (d) => Expanded(
+                                      child: Center(
+                                        child: Text(
+                                          d,
+                                          style: const TextStyle(
+                                            color: Color(0xFF6F7F99),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 8),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: dates.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 7,
+                                mainAxisExtent: 46,
+                              ),
+                              itemBuilder: (context, index) {
+                                final day = dates[index];
+                                final inMonth = day.month == _displayedMonth.month;
+                                final isSelected = _isSameDate(day, _selectedDate);
+
+                                return Center(
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(22),
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedDate = day;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? colors.primary
+                                            : Colors.transparent,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        '${day.day}',
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: isSelected
+                                              ? const Color(0xFF07100A)
+                                              : (inMonth
+                                                  ? Colors.white
+                                                  : const Color(0xFF344760)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  height: 1,
+                  color: const Color(0xFF1A2534),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 62,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      foregroundColor: const Color(0xFF07100A),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(36),
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(_selectedDate),
+                    child: const Text(
+                      'XAC NHAN',
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
