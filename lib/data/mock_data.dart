@@ -98,6 +98,7 @@ class BudgetItemData {
 // ── Statistics Category Model ────────────────────────────────────────
 class StatsCategoryData {
   const StatsCategoryData({
+    this.categoryId,
     required this.name,
     required this.icon,
     required this.amount,
@@ -105,6 +106,7 @@ class StatsCategoryData {
     required this.color,
   });
 
+  final int? categoryId;
   final String name;
   final IconData icon;
   final double amount;

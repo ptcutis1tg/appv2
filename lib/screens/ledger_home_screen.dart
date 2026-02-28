@@ -10,18 +10,30 @@ import 'package:appv2/screens/spending_statistics_screen.dart';
 import 'package:appv2/screens/monthly_budget_screen.dart';
 import 'package:appv2/screens/app_settings_screen.dart';
 import 'package:appv2/screens/database_debug_screen.dart';
+import 'package:appv2/screens/transaction_history_screen.dart';
+import 'package:appv2/screens/transaction_detail_screen.dart';
 import 'package:appv2/db/transaction_repository.dart';
 import 'package:appv2/db/user_repository.dart';
 
 /// Home screen showing balance, income/expense summary, and transactions.
 class LedgerHomeScreen extends StatefulWidget {
-  const LedgerHomeScreen({super.key});
+  const LedgerHomeScreen({
+    super.key,
+    this.embedded = false,
+    this.onNavigate,
+    this.refreshSignal = 0,
+  });
+
+  final bool embedded;
+  final ValueChanged<int>? onNavigate;
+  final int refreshSignal;
 
   @override
   State<LedgerHomeScreen> createState() => _LedgerHomeScreenState();
 }
 
 class _LedgerHomeScreenState extends State<LedgerHomeScreen> {
+  static const int _historyPreviewLimit = 4;
   int _navIndex = 0;
   final _txnRepo = TransactionRepository();
   final _userRepo = UserRepository();
@@ -34,6 +46,14 @@ class _LedgerHomeScreenState extends State<LedgerHomeScreen> {
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void didUpdateWidget(covariant LedgerHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshSignal != widget.refreshSignal) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -81,8 +101,35 @@ class _LedgerHomeScreenState extends State<LedgerHomeScreen> {
     }
   }
 
+  Future<void> _openAllHistory() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TransactionHistoryScreen(transactions: _transactions),
+      ),
+    );
+    if (mounted) {
+      _loadData();
+    }
+  }
+
+  Future<void> _openTransactionDetails(TransactionData transaction) async {
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => TransactionDetailScreen(transaction: transaction),
+      ),
+    );
+
+    if (changed == true && mounted) {
+      _loadData();
+    }
+  }
+
   void _onNavTap(int index) {
-    if (index == _navIndex) return;
+    if (index == _navIndex && !widget.embedded) return;
+    if (widget.embedded) {
+      widget.onNavigate?.call(index);
+      return;
+    }
     switch (index) {
       case 1:
         Navigator.of(context).push(
@@ -143,6 +190,9 @@ class _LedgerHomeScreenState extends State<LedgerHomeScreen> {
                             theme: theme,
                             transactions: _transactions,
                             formatDate: _formatTransactionDate,
+                            previewLimit: _historyPreviewLimit,
+                            onViewAll: _openAllHistory,
+                            onTransactionTap: _openTransactionDetails,
                           ),
                           const SizedBox(height: 120),
                         ],
@@ -152,25 +202,27 @@ class _LedgerHomeScreenState extends State<LedgerHomeScreen> {
                 ],
               ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _navIndex,
-        showCenterFab: true,
-        onFabTap: _openFastEntry,
-        onTap: _onNavTap,
-        items: const [
-          BottomNavItem(
-            icon: Icons.home_outlined,
-            label: 'Trang chủ',
-            filledIcon: Icons.home,
-          ),
-          BottomNavItem(icon: Icons.bar_chart, label: 'Báo cáo'),
-          BottomNavItem(
-            icon: Icons.account_balance_wallet_outlined,
-            label: 'Ngân quỹ',
-          ),
-          BottomNavItem(icon: Icons.settings_outlined, label: 'Cài đặt'),
-        ],
-      ),
+      bottomNavigationBar: widget.embedded
+          ? null
+          : BottomNavBar(
+              currentIndex: _navIndex,
+              showCenterFab: true,
+              onFabTap: _openFastEntry,
+              onTap: _onNavTap,
+              items: const [
+                BottomNavItem(
+                  icon: Icons.home_outlined,
+                  label: 'Trang chu',
+                  filledIcon: Icons.home,
+                ),
+                BottomNavItem(icon: Icons.bar_chart, label: 'Bao cao'),
+                BottomNavItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Ngan quy',
+                ),
+                BottomNavItem(icon: Icons.settings_outlined, label: 'Cai dat'),
+              ],
+            ),
     );
   }
 }
@@ -381,11 +433,17 @@ class _TransactionHistory extends StatelessWidget {
     required this.theme,
     required this.transactions,
     required this.formatDate,
+    required this.previewLimit,
+    required this.onViewAll,
+    required this.onTransactionTap,
   });
 
   final ThemeData theme;
   final List<TransactionData> transactions;
   final String Function(String?) formatDate;
+  final int previewLimit;
+  final VoidCallback onViewAll;
+  final ValueChanged<TransactionData> onTransactionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -403,8 +461,9 @@ class _TransactionHistory extends StatelessWidget {
       );
     }
 
+    final preview = transactions.take(previewLimit).toList();
     final grouped = <String, List<TransactionData>>{};
-    for (final t in transactions) {
+    for (final t in preview) {
       final key = formatDate(t.date);
       grouped.putIfAbsent(key, () => <TransactionData>[]).add(t);
     }
@@ -412,7 +471,11 @@ class _TransactionHistory extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(title: 'Lich su giao dich', actionLabel: 'Tat ca'),
+        SectionHeader(
+          title: 'Lich su giao dich',
+          actionLabel: 'Tat ca',
+          onAction: onViewAll,
+        ),
         const SizedBox(height: 16),
         ...grouped.entries.expand(
           (entry) => [
@@ -439,6 +502,7 @@ class _TransactionHistory extends StatelessWidget {
                       ? '+\$${t.amount.toStringAsFixed(2)}'
                       : '-\$${t.amount.toStringAsFixed(2)}',
                   isIncome: t.isIncome,
+                  onTap: () => onTransactionTap(t),
                 ),
               ),
             ),

@@ -23,4 +23,12 @@ class CategoryRepository {
     }
     return null;
   }
+
+  Future<int> updateCategory(CategoryData category) async {
+    final db = await dbHelper.database;
+    final id = category.id;
+    if (id == null) return 0;
+    final map = category.toMap()..remove('id');
+    return db.update('categories', map, where: 'id = ?', whereArgs: [id]);
+  }
 }

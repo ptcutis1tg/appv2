@@ -6,7 +6,10 @@ import 'package:appv2/db/user_repository.dart';
 
 /// Settings screen: profile, data & security, app settings, logout.
 class AppSettingsScreen extends StatefulWidget {
-  const AppSettingsScreen({super.key});
+  const AppSettingsScreen({super.key, this.embedded = false, this.onNavigate});
+
+  final bool embedded;
+  final ValueChanged<int>? onNavigate;
 
   @override
   State<AppSettingsScreen> createState() => _AppSettingsScreenState();
@@ -47,7 +50,14 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 children: [
                   _AppBar(
                     theme: theme,
-                    onBack: () => Navigator.of(context).pop(),
+                    onBack: () {
+                      if (widget.embedded) {
+                        widget.onNavigate?.call(0);
+                        return;
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    embedded: widget.embedded,
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -76,31 +86,41 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 ],
               ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 3,
-        onTap: (i) {
-          if (i != 3) Navigator.of(context).pop();
-        },
-        items: const [
-          BottomNavItem(
-            icon: Icons.account_balance_wallet_outlined,
-            label: 'Thu chi',
-          ),
-          BottomNavItem(icon: Icons.analytics_outlined, label: 'Thống kê'),
-          BottomNavItem(icon: Icons.savings_outlined, label: 'Ngân sách'),
-          BottomNavItem(icon: Icons.settings, label: 'Cài đặt'),
-        ],
-      ),
+      bottomNavigationBar: widget.embedded
+          ? null
+          : BottomNavBar(
+              currentIndex: 3,
+              onTap: (i) {
+                if (i != 3) Navigator.of(context).pop();
+              },
+              items: const [
+                BottomNavItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Thu chi',
+                ),
+                BottomNavItem(
+                  icon: Icons.analytics_outlined,
+                  label: 'Thong ke',
+                ),
+                BottomNavItem(icon: Icons.savings_outlined, label: 'Ngan sach'),
+                BottomNavItem(icon: Icons.settings, label: 'Cai dat'),
+              ],
+            ),
     );
   }
 }
 
 // ── App Bar ──────────────────────────────────────────────────────────
 class _AppBar extends StatelessWidget {
-  const _AppBar({required this.theme, required this.onBack});
+  const _AppBar({
+    required this.theme,
+    required this.onBack,
+    required this.embedded,
+  });
 
   final ThemeData theme;
   final VoidCallback onBack;
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -108,18 +128,25 @@ class _AppBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: onBack,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
-              ),
-              child: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-            ),
-          ),
+          embedded
+              ? const SizedBox(width: 40, height: 40)
+              : GestureDetector(
+                  onTap: onBack,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.06,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
           Expanded(
             child: Text(
               'Cài đặt',

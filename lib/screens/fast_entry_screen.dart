@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:appv2/data/mock_data.dart';
+import 'package:appv2/db/category_repository.dart';
 import 'package:appv2/db/transaction_repository.dart';
 import 'package:appv2/widgets/shared/icon_circle_button.dart';
 import 'package:appv2/widgets/shared/segmented_toggle.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class FastEntryScreen extends StatefulWidget {
@@ -16,6 +20,205 @@ class _FastEntryScreenState extends State<FastEntryScreen> {
   String _amount = '0.00';
   DateTime _selectedDate = DateTime.now();
   final _txnRepo = TransactionRepository();
+  final _categoryRepo = CategoryRepository();
+  final _rng = Random();
+  List<CategoryData> _categories = [];
+  static const _colorChoices = <Color>[
+    Color(0xFF13EC5B),
+    Color(0xFF22C55E),
+    Color(0xFF10B981),
+    Color(0xFF06B6D4),
+    Color(0xFF3B82F6),
+    Color(0xFF8B5CF6),
+    Color(0xFFF97316),
+    Color(0xFFEAB308),
+    Color(0xFFEF4444),
+    Color(0xFFF43F5E),
+  ];
+  static const _newCategoryIcons = <IconData>[
+    Icons.pets,
+    Icons.fitness_center,
+    Icons.movie,
+    Icons.school,
+    Icons.local_hospital,
+    Icons.sports_esports,
+    Icons.celebration,
+    Icons.star,
+    Icons.coffee,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final dbCategories = await _categoryRepo.getAllCategories();
+    if (!mounted) return;
+
+    final merged = <CategoryData>[
+      ...dbCategories,
+      ...kQuickCategories.where(
+        (quick) => !dbCategories.any((db) => db.id == quick.id),
+      ),
+    ];
+
+    setState(() {
+      _categories = merged;
+    });
+  }
+
+  Future<void> _openCreateCategoryDialog() async {
+    final nameController = TextEditingController();
+    IconData selectedIcon = _newCategoryIcons.first;
+    Color selectedColor = _colorChoices[_rng.nextInt(_colorChoices.length)];
+    final colors = Theme.of(context).colorScheme;
+
+    final created = await showDialog<CategoryData>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(color: colors.primary.withValues(alpha: 0.25)),
+              ),
+              title: const Text('Them hang muc moi'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Ten hang muc',
+                        hintText: 'Vi du: Thu cung',
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text('Chon icon'),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _newCategoryIcons.map((icon) {
+                        final active = selectedIcon == icon;
+                        return InkWell(
+                          onTap: () =>
+                              setDialogState(() => selectedIcon = icon),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: active
+                                  ? colors.primary.withValues(alpha: 0.18)
+                                  : colors.onSurface.withValues(alpha: 0.06),
+                              border: Border.all(
+                                color: active
+                                    ? colors.primary
+                                    : colors.onSurface.withValues(alpha: 0.12),
+                              ),
+                            ),
+                            child: Icon(icon, color: colors.primary),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text('Chon mau'),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ..._colorChoices.map((c) {
+                          final active = selectedColor == c;
+                          return InkWell(
+                            onTap: () =>
+                                setDialogState(() => selectedColor = c),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: c,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: active
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                        IconButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              selectedColor =
+                                  _colorChoices[_rng.nextInt(
+                                    _colorChoices.length,
+                                  )];
+                            });
+                          },
+                          icon: const Icon(Icons.shuffle),
+                          tooltip: 'Mau ngau nhien',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Huy'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final name = nameController.text.trim();
+                    if (name.isEmpty) return;
+                    Navigator.of(context).pop(
+                      CategoryData(
+                        name: name,
+                        icon: selectedIcon,
+                        color: selectedColor,
+                      ),
+                    );
+                  },
+                  child: const Text('Them'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    nameController.dispose();
+    if (created == null) return;
+
+    final newId = await _categoryRepo.insertCategory(created);
+    if (!mounted) return;
+
+    final savedCategory = CategoryData(
+      id: newId,
+      name: created.name,
+      icon: created.icon,
+      color: created.color,
+    );
+
+    setState(() {
+      _categories = [savedCategory, ..._categories];
+    });
+  }
 
   void _onNumpadTap(String key) {
     setState(() {
@@ -115,7 +318,9 @@ class _FastEntryScreenState extends State<FastEntryScreen> {
             _Numpad(onKeyTap: _onNumpadTap, colors: colors),
             _CategoryQuickSelect(
               colors: colors,
+              categories: _categories.isEmpty ? kQuickCategories : _categories,
               onCategoryTap: _saveTransaction,
+              onAddCategory: _openCreateCategoryDialog,
             ),
           ],
         ),
@@ -172,10 +377,7 @@ class _Header extends StatelessWidget {
 }
 
 class _AmountDisplay extends StatelessWidget {
-  const _AmountDisplay({
-    required this.amount,
-    required this.selectedDateLabel,
-  });
+  const _AmountDisplay({required this.amount, required this.selectedDateLabel});
 
   final String amount;
   final String selectedDateLabel;
@@ -318,14 +520,37 @@ class _NumpadKey extends StatelessWidget {
   }
 }
 
-class _CategoryQuickSelect extends StatelessWidget {
+class _CategoryQuickSelect extends StatefulWidget {
   const _CategoryQuickSelect({
     required this.colors,
+    required this.categories,
     required this.onCategoryTap,
+    required this.onAddCategory,
   });
 
   final ColorScheme colors;
+  final List<CategoryData> categories;
   final ValueChanged<CategoryData> onCategoryTap;
+  final VoidCallback onAddCategory;
+
+  @override
+  State<_CategoryQuickSelect> createState() => _CategoryQuickSelectState();
+}
+
+class _CategoryQuickSelectState extends State<_CategoryQuickSelect> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -342,29 +567,102 @@ class _CategoryQuickSelect extends StatelessWidget {
             child: Text(
               'SELECT CATEGORY TO SAVE',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.onSurfaceVariant,
+                color: widget.colors.onSurfaceVariant,
                 letterSpacing: 2,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'Vuot trai/phai de xem them',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: widget.colors.onSurfaceVariant.withValues(alpha: 0.8),
               ),
             ),
           ),
           SizedBox(
             height: 84,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: kQuickCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final cat = kQuickCategories[index];
-                return _CategoryChip(
-                  icon: cat.icon,
-                  label: cat.name,
-                  colors: colors,
-                  onTap: () => onCategoryTap(cat),
-                );
-              },
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: const {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                  PointerDeviceKind.stylus,
+                  PointerDeviceKind.invertedStylus,
+                  PointerDeviceKind.unknown,
+                },
+              ),
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                interactive: true,
+                child: ListView.separated(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  itemCount: widget.categories.length + 1,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _AddCategoryChip(
+                        colors: widget.colors,
+                        onTap: widget.onAddCategory,
+                      );
+                    }
+                    final cat = widget.categories[index - 1];
+                    return _CategoryChip(
+                      icon: cat.icon,
+                      label: cat.name,
+                      colors: widget.colors,
+                      onTap: () => widget.onCategoryTap(cat),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AddCategoryChip extends StatelessWidget {
+  const _AddCategoryChip({required this.colors, required this.onTap});
+
+  final ColorScheme colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        width: 84,
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_circle_outline, color: colors.primary, size: 26),
+            const SizedBox(height: 4),
+            Text(
+              'New',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: colors.onSurface,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -449,18 +747,27 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate;
-    _displayedMonth = DateTime(widget.initialDate.year, widget.initialDate.month);
+    _displayedMonth = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+    );
   }
 
   void _goPrevMonth() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month - 1,
+      );
     });
   }
 
   void _goNextMonth() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month + 1,
+      );
     });
   }
 
@@ -475,7 +782,9 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
       _displayedMonth = DateTime(year, _displayedMonth.month, 1);
       if (_selectedDate.year != year) {
         final maxDayInMonth = DateTime(year, _selectedDate.month + 1, 0).day;
-        final safeDay = _selectedDate.day > maxDayInMonth ? maxDayInMonth : _selectedDate.day;
+        final safeDay = _selectedDate.day > maxDayInMonth
+            ? maxDayInMonth
+            : _selectedDate.day;
         _selectedDate = DateTime(
           year,
           _selectedDate.month,
@@ -495,7 +804,9 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
 
   List<DateTime> _visibleDatesForMonth(DateTime month) {
     final firstOfMonth = DateTime(month.year, month.month, 1);
-    final firstGridDate = firstOfMonth.subtract(Duration(days: firstOfMonth.weekday - 1));
+    final firstGridDate = firstOfMonth.subtract(
+      Duration(days: firstOfMonth.weekday - 1),
+    );
     return List.generate(42, (i) => firstGridDate.add(Duration(days: i)));
   }
 
@@ -543,7 +854,10 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                           borderRadius: BorderRadius.circular(12),
                           onTap: _toggleYearPicker,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
+                            ),
                             child: Row(
                               children: [
                                 Text(
@@ -570,11 +884,17 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                     if (!_showYearPicker) ...[
                       IconButton(
                         onPressed: _goPrevMonth,
-                        icon: const Icon(Icons.chevron_left, color: Color(0xFF90A2C3)),
+                        icon: const Icon(
+                          Icons.chevron_left,
+                          color: Color(0xFF90A2C3),
+                        ),
                       ),
                       IconButton(
                         onPressed: _goNextMonth,
-                        icon: const Icon(Icons.chevron_right, color: Color(0xFF90A2C3)),
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          color: Color(0xFF90A2C3),
+                        ),
                       ),
                     ],
                   ],
@@ -588,12 +908,13 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                           height: 320,
                           child: GridView.builder(
                             itemCount: years.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisExtent: 56,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisExtent: 56,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
                             itemBuilder: (context, index) {
                               final year = years[index];
                               final isCurrent = year == _displayedMonth.year;
@@ -656,13 +977,17 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                               itemCount: dates.length,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 7,
-                                mainAxisExtent: 46,
-                              ),
+                                    crossAxisCount: 7,
+                                    mainAxisExtent: 46,
+                                  ),
                               itemBuilder: (context, index) {
                                 final day = dates[index];
-                                final inMonth = day.month == _displayedMonth.month;
-                                final isSelected = _isSameDate(day, _selectedDate);
+                                final inMonth =
+                                    day.month == _displayedMonth.month;
+                                final isSelected = _isSameDate(
+                                  day,
+                                  _selectedDate,
+                                );
 
                                 return Center(
                                   child: InkWell(
@@ -692,8 +1017,8 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                                           color: isSelected
                                               ? const Color(0xFF07100A)
                                               : (inMonth
-                                                  ? Colors.white
-                                                  : const Color(0xFF344760)),
+                                                    ? Colors.white
+                                                    : const Color(0xFF344760)),
                                         ),
                                       ),
                                     ),
@@ -703,7 +1028,7 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                             ),
                           ],
                         ),
-                      ),
+                ),
                 const SizedBox(height: 14),
                 Container(
                   width: double.infinity,
@@ -725,7 +1050,10 @@ class _CalendarPickerSheetState extends State<_CalendarPickerSheet> {
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
                     child: const Text(
                       'XAC NHAN',
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

@@ -24,15 +24,16 @@ class BudgetRepository {
     );
 
     return maps.map((map) {
-      final color = Color(int.parse(map['c_color_hex'] as String, radix: 16));
+      final spent = (map['spent'] as num?)?.toDouble() ?? 0.0;
+      final budget = (map['budget'] as num?)?.toDouble() ?? 0.0;
       return BudgetItemData(
         id: map['id'] as int?,
         categoryId: map['category_id'] as int?,
         name: map['c_name'] as String,
         icon: IconData(map['c_icon_code'] as int, fontFamily: 'MaterialIcons'),
-        spent: map['spent'] as double,
-        budget: map['budget'] as double,
-        progressColor: color, // simplify for now
+        spent: spent,
+        budget: budget,
+        progressColor: const Color(0xFF13EC5B),
       );
     }).toList();
   }
@@ -59,5 +60,14 @@ class BudgetRepository {
         'month': month,
       });
     }
+  }
+
+  Future<int> deleteBudget(int categoryId, String month) async {
+    final db = await dbHelper.database;
+    return db.delete(
+      'budgets',
+      where: 'category_id = ? AND month = ?',
+      whereArgs: [categoryId, month],
+    );
   }
 }
