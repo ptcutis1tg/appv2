@@ -1,0 +1,11 @@
+Analyzing appv2...                                              
+
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\data\mock_data.dart:21:24 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\screens\app_settings_screen.dart:169:39 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\screens\app_settings_screen.dart:169:43 - unnecessary_underscores
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\screens\app_settings_screen.dart:274:21 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\screens\fast_entry_screen.dart:310:37 - unnecessary_underscores
+   info - The private field _navIndex could be 'final' - lib\screens\ledger_home_screen.dart:24:7 - prefer_final_fields
+   info - Unnecessary use of multiple underscores - lib\screens\ledger_home_screen.dart:181:33 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\screens\ledger_home_screen.dart:181:37 - unnecessary_underscores
+

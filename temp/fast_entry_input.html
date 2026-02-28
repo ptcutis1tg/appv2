@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Fast Entry Input</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden">
+<div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
+<!-- Header / Modal Controls -->
+<div class="flex items-center p-4 justify-between">
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex p-1 bg-slate-200 dark:bg-primary/10 rounded-xl w-48">
+<label class="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-1.5 transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:text-slate-900 dark:has-[:checked]:text-background-dark text-slate-500 dark:text-slate-400 text-sm font-bold">
+<span>Expense</span>
+<input checked="" class="hidden" name="type" type="radio" value="Expense"/>
+</label>
+<label class="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-1.5 transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:text-slate-900 dark:has-[:checked]:text-background-dark text-slate-500 dark:text-slate-400 text-sm font-bold">
+<span>Income</span>
+<input class="hidden" name="type" type="radio" value="Income"/>
+</label>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</div>
+<!-- Large Numeric Display -->
+<div class="flex flex-col items-center justify-center flex-1 px-4">
+<div class="flex items-end gap-1 mb-2">
+<span class="text-2xl font-bold text-slate-400 dark:text-slate-500 pb-2">$</span>
+<span class="text-7xl font-bold tracking-tighter text-slate-900 dark:text-slate-100">0.00</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-primary/60 font-medium">Add note...</p>
+</div>
+<!-- Custom Numpad with Operators -->
+<div class="grid grid-cols-4 gap-2 p-4 bg-slate-100/50 dark:bg-white/5 rounded-t-3xl border-t border-slate-200 dark:border-primary/10">
+<!-- Row 1 -->
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">7</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">8</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">9</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-slate-200 dark:bg-primary/20 text-primary">÷</button>
+<!-- Row 2 -->
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">4</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">5</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">6</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-slate-200 dark:bg-primary/20 text-primary">×</button>
+<!-- Row 3 -->
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">1</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">2</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">3</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-slate-200 dark:bg-primary/20 text-primary">−</button>
+<!-- Row 4 -->
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">.</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">0</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-white dark:bg-background-dark/50 hover:bg-primary/10">
+<span class="material-symbols-outlined">backspace</span>
+</button>
+<button class="h-16 flex items-center justify-center text-2xl font-semibold rounded-xl bg-slate-200 dark:bg-primary/20 text-primary">+</button>
+</div>
+<!-- Quick Categories (Confirmation Step) -->
+<div class="bg-slate-100 dark:bg-background-dark px-4 pb-10 pt-4">
+<p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 px-1">Select Category to Save</p>
+<div class="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">restaurant</span>
+<span class="text-xs font-bold">Food</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">directions_car</span>
+<span class="text-xs font-bold">Travel</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">shopping_bag</span>
+<span class="text-xs font-bold">Shop</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">receipt_long</span>
+<span class="text-xs font-bold">Bills</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">payments</span>
+<span class="text-xs font-bold">Salary</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[84px] aspect-square rounded-2xl bg-white dark:bg-primary/10 border border-slate-200 dark:border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl mb-1">grid_view</span>
+<span class="text-xs font-bold">Other</span>
+</button>
+</div>
+</div>
+<!-- iOS Indicator -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+</div>
+<!-- Additional utility styles for a mobile feel -->
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

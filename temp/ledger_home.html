@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Real-time Ledger Home</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-md mx-auto border-x border-primary/10 shadow-2xl">
+<!-- Top Header Navigation -->
+<header class="flex items-center justify-between px-6 pt-8 pb-4 bg-background-light dark:bg-background-dark">
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-lg font-bold tracking-tight">Real-time Ledger</h2>
+<button class="flex items-center justify-center size-10 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar close up" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpOynysgRBEeGefeAiEAGXZgo148g535-QFW5_9kULenLeNk0jt8VWHj4aDoG4r1flSzsFq8WM63FPNTmRw8vlCxhbYh3hQC5e7XBXvCtwLEMydKGU2yKU8m39nY26QwyUEqUwgsLbDv_5AuI09FP7Bd3cuANSOKrzVT_rwEbjrqEisM8SqJVKw5S8bq8irLnz6Ej_WbkNWoeGdzaKxsIaDjWq3cfj31QAUan5Qrj_4vxvzvJiCNnUAU2Y_4zQ0D8faXsMQfC7b6U"/>
+</button>
+</header>
+<!-- Main Content Area (Scrollable) -->
+<main class="flex-1 overflow-y-auto px-6 pb-32">
+<!-- Balance Hero Section -->
+<section class="flex flex-col items-center py-8">
+<p class="text-slate-500 dark:text-primary/60 text-sm font-medium uppercase tracking-widest mb-2">Số dư hiện tại</p>
+<h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">$4,250.00</h1>
+<div class="flex w-full gap-4 mt-8">
+<div class="flex flex-1 flex-col gap-1 rounded-xl p-4 bg-slate-100 dark:bg-primary/5 border border-slate-200 dark:border-primary/10">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm">arrow_downward</span>
+<p class="text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase">Thu nhập</p>
+</div>
+<p class="text-xl font-bold text-slate-900 dark:text-slate-100">$5,400.00</p>
+<p class="text-primary text-xs font-bold">+12%</p>
+</div>
+<div class="flex flex-1 flex-col gap-1 rounded-xl p-4 bg-slate-100 dark:bg-primary/5 border border-slate-200 dark:border-primary/10">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-rose-500 text-sm">arrow_upward</span>
+<p class="text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase">Chi tiêu</p>
+</div>
+<p class="text-xl font-bold text-slate-900 dark:text-slate-100">$1,150.00</p>
+<p class="text-rose-500 text-xs font-bold">-5%</p>
+</div>
+</div>
+</section>
+<!-- Transaction History Section -->
+<section class="mt-4">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold">Lịch sử giao dịch</h3>
+<button class="text-primary text-sm font-semibold">Tất cả</button>
+</div>
+<!-- Empty State (Hidden by default, shown if no data) -->
+<div class="hidden flex flex-col items-center justify-center py-12 text-center">
+<div class="size-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-4xl">coffee</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed px-8">
+                        Bạn chưa có giao dịch nào hôm nay.<br/>Thử nhập một cốc cà phê nhé!
+                    </p>
+</div>
+<!-- Transaction List -->
+<div class="space-y-3">
+<!-- Day Header -->
+<p class="text-xs font-bold text-slate-400 uppercase tracking-tighter pt-2">Hôm nay, 24 Tháng 5</p>
+<!-- Transaction Item -->
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-primary/5 rounded-xl border border-slate-100 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div>
+<p class="font-bold text-sm">Ăn trưa</p>
+<p class="text-xs text-slate-500">Ăn uống</p>
+</div>
+</div>
+<p class="font-bold text-rose-500">-$25.00</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-primary/5 rounded-xl border border-slate-100 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<p class="font-bold text-sm">Lương tháng 5</p>
+<p class="text-xs text-slate-500">Thu nhập</p>
+</div>
+</div>
+<p class="font-bold text-primary">+$3,200.00</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-primary/5 rounded-xl border border-slate-100 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-500">
+<span class="material-symbols-outlined">directions_car</span>
+</div>
+<div>
+<p class="font-bold text-sm">Xăng xe</p>
+<p class="text-xs text-slate-500">Di chuyển</p>
+</div>
+</div>
+<p class="font-bold text-rose-500">-$15.50</p>
+</div>
+<!-- Previous Day -->
+<p class="text-xs font-bold text-slate-400 uppercase tracking-tighter pt-4">Hôm qua, 23 Tháng 5</p>
+<div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-primary/5 rounded-xl border border-slate-100 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-500">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div>
+<p class="font-bold text-sm">Quần áo mới</p>
+<p class="text-xs text-slate-500">Mua sắm</p>
+</div>
+</div>
+<p class="font-bold text-rose-500">-$120.00</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<div class="absolute bottom-24 left-1/2 -translate-x-1/2 z-20">
+<button class="size-16 rounded-full bg-primary text-background-dark shadow-lg shadow-primary/30 flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-4xl font-bold">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="absolute bottom-0 w-full bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-primary/10 px-6 pb-8 pt-4 flex justify-between items-center z-10">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">home</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Trang chủ</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Báo cáo</span>
+</a>
+<div class="w-16"></div> <!-- Spacer for FAB -->
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Ngân quỹ</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Cài đặt</span>
+</a>
+</nav>
+</div>
+</body></html>

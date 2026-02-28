@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .donut-segment {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 pt-12 pb-4">
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-200/50 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<h1 class="text-xl font-extrabold tracking-tight">Báo cáo</h1>
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-200/50 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</header>
+<!-- Switcher -->
+<div class="px-6 py-4">
+<div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200/50 dark:bg-primary/5 p-1.5">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:shadow-sm text-slate-500 dark:text-slate-400 has-[:checked]:text-background-dark text-sm font-bold">
+<span class="truncate">Chi tiêu</span>
+<input checked="" class="hidden" name="report_type" type="radio" value="expense"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 transition-all has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:shadow-sm text-slate-500 dark:text-slate-400 has-[:checked]:text-background-dark text-sm font-bold">
+<span class="truncate">Thu nhập</span>
+<input class="hidden" name="report_type" type="radio" value="income"/>
+</label>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-6">
+<!-- Summary Section -->
+<div class="flex flex-col items-center py-8">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Tổng chi tiêu tháng này</p>
+<h2 class="text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-8">$1,240.50</h2>
+<!-- Minimalist Donut Chart -->
+<div class="relative flex items-center justify-center size-64">
+<svg class="size-full" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle class="text-slate-200 dark:text-primary/10" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="12"></circle>
+<!-- Food Segment (45%) -->
+<circle class="text-primary donut-segment" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="113.1 251.3" stroke-dashoffset="0" stroke-width="12"></circle>
+<!-- Shopping Segment (30%) -->
+<circle class="text-primary/60 donut-segment" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="75.4 251.3" stroke-dashoffset="-113.1" stroke-width="12"></circle>
+<!-- Transport Segment (15%) -->
+<circle class="text-primary/40 donut-segment" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="37.7 251.3" stroke-dashoffset="-188.5" stroke-width="12"></circle>
+<!-- Others Segment (10%) -->
+<circle class="text-primary/20 donut-segment" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="25.1 251.3" stroke-dashoffset="-226.2" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-primary">analytics</span>
+</div>
+</div>
+</div>
+<!-- List Section -->
+<div class="space-y-4 pb-24">
+<h3 class="text-lg font-bold">Danh mục</h3>
+<!-- Category Item -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-slate-200/50 dark:border-primary/10">
+<div class="size-12 rounded-full bg-primary flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<p class="font-bold">Ăn uống</p>
+<p class="font-bold">$558.20</p>
+</div>
+<div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+<div class="w-2/3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+<span>45%</span>
+</div>
+</div>
+</div>
+<!-- Category Item -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-slate-200/50 dark:border-primary/10">
+<div class="size-12 rounded-full bg-primary/60 flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<p class="font-bold">Mua sắm</p>
+<p class="font-bold">$372.15</p>
+</div>
+<div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+<div class="w-2/3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/60 w-[30%]"></div>
+</div>
+<span>30%</span>
+</div>
+</div>
+</div>
+<!-- Category Item -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-100 dark:bg-primary/5 border border-slate-200/50 dark:border-primary/10">
+<div class="size-12 rounded-full bg-primary/40 flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined">directions_car</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<p class="font-bold">Di chuyển</p>
+<p class="font-bold">$186.08</p>
+</div>
+<div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+<div class="w-2/3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/40 w-[15%]"></div>
+</div>
+<span>15%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-primary/10 pb-8 pt-2">
+<div class="flex justify-around items-center px-6">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-bold">Giao dịch</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">pie_chart</span>
+<span class="text-[10px] font-bold">Báo cáo</span>
+</a>
+<div class="relative -top-6">
+<button class="size-14 bg-primary text-background-dark rounded-full shadow-lg shadow-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined font-bold text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px] font-bold">Ví</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold">Cài đặt</span>
+</a>
+</div>
+</nav>
+</body></html>
